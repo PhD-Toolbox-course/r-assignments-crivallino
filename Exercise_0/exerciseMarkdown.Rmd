@@ -1,0 +1,100 @@
+---
+title: "exercise"
+author: "Cristina"
+date: "02 febbraio 2018"
+output: html_document
+---
+<http://rmarkdown.rstudio.com>
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document
+
+to add chunks -> keyboard shortcut Ctrl + Alt + I 
+```{r}
+#setting wd and reading data
+setwd("C:/Users/Cristina/Documents/pHD/R/CorsoChiapelloGhignone2018")
+ecology <- read.csv("ecologydata3.csv")
+str(ecology)
+dim(ecology)
+names(ecology)
+```
+
+
+```{r}
+#looking for distribution
+hist(ecology$plant.density)
+hist(ecology$Abundance.of.insects)
+hist(ecology$Temperature...C.)
+```
+```{r}
+#looking for outliers
+dotchart(ecology$plant.density)
+dotchart(ecology$Abundance.of.insects)
+dotchart(ecology$Temperature...C.)
+```
+```{r}
+library(dplyr)
+#group by, tally and summarize
+#to group the table based on a variable 
+#tally
+#to do some calculation
+ecology %>%
+  group_by(plant.density)%>%
+  tally()
+
+ecology %>%
+  group_by(plant.density) %>% summarize(mean_Abundance.of.insects = mean(Abundance.of.insects))%>% 
+#plant density 4 has the greatest abund of insects
+
+ecology %>%
+  group_by(Temperature...C.) %>%
+  tally()
+
+ecology %>%
+  group_by(Temperature...C.) %>%
+summarize(mean_Abundance.of.insects = mean(Abundance.of.insects))
+#T 13° has the greatest abund of insects
+```
+
+```{r}
+#arrange according to insect abund
+ecology%>% 
+  arrange(Abundance.of.insects)
+```
+
+```{r}
+#abundance of insects for each plant density and temperature 
+ecology%>%
+  filter(!is.na(Abundance.of.insects))%>%
+  group_by(plant.density)%>%
+  summarise(min_abund = min(Abundance.of.insects),
+            max_abund = max(Abundance.of.insects))
+
+ecology%>%
+  filter(!is.na(Abundance.of.insects))%>%
+  group_by(Temperature...C.)%>%
+  summarise(min_abund = min(Abundance.of.insects),
+            max_abund = max(Abundance.of.insects))
+```
+```{r}
+library(ggplot2)
+#creating plots
+ggplot(ecology,
+       aes(x = Temperature...C., y = Abundance.of.insects))+
+  geom_point(size= 5, aes(colour = plant.density))
+```
+```{r}
+#boxplots
+eco_plot <- ggplot(ecology,
+       aes(group = Temperature...C., x = Temperature...C., y = Abundance.of.insects))
+eco_plot + geom_boxplot(colour = "green4")
+```
+```{r}
+#time series data
+dayly_count <- ecology%>%
+  group_by(Days, Temperature...C., plant.density)%>%
+  tally()
+
+eco_time_plot <- ggplot(dayly_count, aes(x= Days, y = n))
+eco_time_plot + geom_point(aes(group =Temperature...C., colour = Temperature...C.))
+```
+
